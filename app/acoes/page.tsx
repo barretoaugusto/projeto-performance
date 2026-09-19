@@ -87,18 +87,53 @@ export default function AcoesPage() {
       return;
     }
 
-    await supabase
-      .from("acoes_historico")
-      .insert([
-        {
-          acao_id: id,
-          campo: "Status",
-          valor_antigo: statusAnterior,
-          valor_novo: novoStatus,
-          data_alteracao:
-            new Date().toISOString(),
-        },
-      ]);
+    const retorno = await supabase
+  .from("acoes_historico")
+  .insert([
+    {
+      acao_id: id,
+
+      acao_descricao:
+        acaoAtual?.descricao,
+
+      usuario: "Augusto",
+
+      campo: "Status",
+
+      valor_antigo:
+        statusAnterior,
+
+      valor_novo:
+        novoStatus,
+
+      data_alteracao:
+        new Date().toISOString(),
+    },
+  ]);
+
+console.log("RETORNO:", retorno);
+console.log("ERRO:", retorno.error);
+
+console.log(
+  "ERROR:",
+  retorno.error
+);
+
+console.log(
+  "MESSAGE:",
+  retorno.error?.message
+);
+
+console.log(
+  "DETAILS:",
+  retorno.error?.details
+);
+
+console.log(
+  "CODE:",
+  retorno.error?.code
+);
+
 
     carregarAcoes();
   }
