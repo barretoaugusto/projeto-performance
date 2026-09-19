@@ -79,6 +79,18 @@ export default function LancamentosPage() {
           proximos_passos: proximosPassos,
         },
       ]);
+if (problemas.trim() !== "") {
+  await supabase
+    .from("acoes")
+    .insert([
+      {
+        descricao: problemas,
+        responsavel: "Não Definido",
+        prazo: null,
+        status: "Aberta",
+      },
+    ]);
+}
 
     if (error) {
       alert(JSON.stringify(error));

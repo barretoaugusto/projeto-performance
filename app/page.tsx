@@ -9,7 +9,12 @@ export default function Home() {
   const [projetos, setProjetos] = useState(0);
   const [lancamentos, setLancamentos] = useState(0);
   const [horas, setHoras] = useState(0);
-
+  const [acoesAbertas, setAcoesAbertas] = useState(0);
+  const [acoesConcluidas, setAcoesConcluidas] = useState(0);
+  const [acoesAndamento, setAcoesAndamento] = useState(0);
+  const [acoesPausadas, setAcoesPausadas] = useState(0);
+  const [acoesCanceladas, setAcoesCanceladas] = useState(0);
+  
   useEffect(() => {
     carregarIndicadores();
   }, []);
@@ -42,6 +47,39 @@ export default function Home() {
         item.horas_trabalhadas || 0
       );
     });
+    const acoesResult = await supabase
+  .from("acoes")
+  .select("status");
+
+const abertas =
+  acoesResult.data?.filter(
+    (acao: any) => acao.status === "Aberta"
+  ).length || 0;
+
+const concluidas =
+  acoesResult.data?.filter(
+    (acao: any) => acao.status === "Concluída"
+  ).length || 0;
+  const andamento =
+  acoesResult.data?.filter(
+    (acao: any) => acao.status === "Em Andamento"
+  ).length || 0;
+
+const pausadas =
+  acoesResult.data?.filter(
+    (acao: any) => acao.status === "Pausada"
+  ).length || 0;
+
+const canceladas =
+  acoesResult.data?.filter(
+    (acao: any) => acao.status === "Cancelada"
+  ).length || 0;
+
+setAcoesAbertas(abertas);
+setAcoesConcluidas(concluidas);
+setAcoesAndamento(andamento);
+setAcoesPausadas(pausadas);
+setAcoesCanceladas(canceladas);
 
     setClientes(clientesResult.count || 0);
     setProgramas(programasResult.count || 0);
@@ -56,7 +94,7 @@ export default function Home() {
         Desempenho do Projeto
       </h1>
 
-      <div className="grid grid-cols-5 gap-6">
+      <div className="grid grid-cols-10 gap-6">
 
         <div className="bg-white p-6 rounded shadow">
           <h2 className="text-gray-600">
@@ -107,6 +145,54 @@ export default function Home() {
             {horas}h
           </p>
         </div>
+        <div className="bg-white p-6 rounded shadow">
+  <h2 className="text-gray-600">
+    Ações Abertas
+  </h2>
+
+  <p className="text-4xl font-bold text-orange-600">
+    {acoesAbertas}
+  </p>
+</div>
+
+<div className="bg-white p-6 rounded shadow">
+  <h2 className="text-gray-600">
+    Ações Concluídas
+  </h2>
+
+  <p className="text-4xl font-bold text-green-600">
+    {acoesConcluidas}
+  </p>
+</div>
+<div className="bg-white p-6 rounded shadow">
+  <h2 className="text-gray-600">
+    Em Andamento
+  </h2>
+
+  <p className="text-4xl font-bold text-blue-600">
+    {acoesAndamento}
+  </p>
+</div>
+
+<div className="bg-white p-6 rounded shadow">
+  <h2 className="text-gray-600">
+    Pausadas
+  </h2>
+
+  <p className="text-4xl font-bold text-yellow-600">
+    {acoesPausadas}
+  </p>
+</div>
+
+<div className="bg-white p-6 rounded shadow">
+  <h2 className="text-gray-600">
+    Canceladas
+  </h2>
+
+  <p className="text-4xl font-bold text-red-600">
+    {acoesCanceladas}
+  </p>
+</div>
 
       </div>
     </main>

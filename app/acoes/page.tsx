@@ -9,6 +9,13 @@ export default function AcoesPage() {
   const [responsavel, setResponsavel] = useState("");
   const [prazo, setPrazo] = useState("");
   const [status, setStatus] = useState("Aberta");
+  const [responsaveis, setResponsaveis] = useState<
+  Record<string, string>
+>({});
+
+const [prazos, setPrazos] = useState<
+  Record<string, string>
+>({});
 
   useEffect(() => {
     carregarAcoes();
@@ -57,21 +64,40 @@ console.log("ERROR:", error);
     carregarAcoes();
   }
 
-  async function concluirAcao(id: string) {
-    const { error } = await supabase
-      .from("acoes")
-      .update({
-        status: "Concluída",
-      })
-      .eq("id", id);
+  async function atualizarStatus(
+  id: string,
+  novoStatus: string
+) {
+  const { error } = await supabase
+    .from("acoes")
+    .update({
+      status: novoStatus,
+    })
+    .eq("id", id);
 
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    carregarAcoes();
+  if (error) {
+    console.error(error);
+    return;
   }
+
+  carregarAcoes();
+}
+async function atualizarAcao(id: string) {
+  const { error } = await supabase
+    .from("acoes")
+    .update({
+      responsavel: responsaveis[id],
+      prazo: prazos[id],
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  carregarAcoes();
+}
 
   return (
     <main className="p-10 bg-slate-100 min-h-screen">
@@ -131,6 +157,46 @@ console.log("ERROR:", error);
             <h2 className="text-xl font-bold text-black">
               {acao.descricao}
             </h2>
+            <input
+  placeholder="Responsável"
+  value={
+    responsaveis[acao.id] ??
+    acao.responsavel ??
+    ""
+  }
+  onChange={(e) =>
+    setResponsaveis({
+  ...responsaveis,
+  [acao.id]: e.target.value,
+})
+  }
+  className="border p-2 w-full mt-3 text-black"
+/>
+
+<input
+  type="date"
+  value={
+    prazos[acao.id] ??
+    acao.prazo ??
+    ""
+  }
+  onChange={(e) =>
+  setPrazos({
+  ...prazos,
+  [acao.id]: e.target.value,
+})
+  }
+  className="border p-2 w-full mt-2 text-black"
+/>
+
+<button
+  onClick={() =>
+    atualizarAcao(acao.id)
+  }
+  className="mt-2 bg-slate-700 text-white px-3 py-1 rounded"
+>
+  💾 Salvar Dados
+</button>
 
             <p className="text-gray-700 mt-2">
               Responsável: {acao.responsavel}
@@ -144,14 +210,57 @@ console.log("ERROR:", error);
               Status: {acao.status}
             </p>
 
-            {acao.status !== "Concluída" && (
-              <button
-                onClick={() => concluirAcao(acao.id)}
-                className="mt-3 bg-green-600 text-white px-3 py-1 rounded"
-              >
-                ✅ Concluir
-              </button>
-            )}
+            <div className="mt-3 flex gap-2 flex-wrap">
+
+  <button
+    onClick={() =>
+      atualizarStatus(
+        acao.id,
+        "Em Andamento"
+      )
+    }
+    className="bg-blue-600 text-white px-3 py-1 rounded"
+  >
+    ▶ Em Andamento
+  </button>
+
+  <button
+    onClick={() =>
+      atualizarStatus(
+        acao.id,
+        "Pausada"
+      )
+    }
+    className="bg-yellow-500 text-white px-3 py-1 rounded"
+  >
+    ⏸ Pausada
+  </button>
+
+  <button
+    onClick={() =>
+      atualizarStatus(
+        acao.id,
+        "Cancelada"
+      )
+    }
+    className="bg-red-600 text-white px-3 py-1 rounded"
+  >
+    ❌ Cancelada
+  </button>
+
+  <button
+    onClick={() =>
+      atualizarStatus(
+        acao.id,
+        "Concluída"
+      )
+    }
+    className="bg-green-600 text-white px-3 py-1 rounded"
+  >
+    ✅ Concluída
+  </button>
+
+</div>
           </div>
         ))}
       </div>
