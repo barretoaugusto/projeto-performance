@@ -142,6 +142,11 @@ console.log(
     const acaoAtual = acoes.find(
       (a) => a.id === id
     );
+const responsavelAnterior =
+  acaoAtual?.responsavel || "";
+
+const prazoAnterior =
+  acaoAtual?.prazo || "";
 
     const { error } = await supabase
       .from("acoes")
@@ -160,6 +165,60 @@ console.log(
       console.error(error);
       return;
     }
+if (
+  responsavelAnterior !==
+  responsaveis[id]
+) {
+  await supabase
+    .from("acoes_historico")
+    .insert([
+      {
+        acao_id: id,
+        acao_descricao:
+          acaoAtual?.descricao,
+
+        usuario: "Augusto",
+
+        campo: "Responsável",
+
+        valor_antigo:
+          responsavelAnterior,
+
+        valor_novo:
+          responsaveis[id],
+
+        data_alteracao:
+          new Date().toISOString(),
+      },
+    ]);
+}
+if (
+  prazoAnterior !==
+  prazos[id]
+) {
+  await supabase
+    .from("acoes_historico")
+    .insert([
+      {
+        acao_id: id,
+        acao_descricao:
+          acaoAtual?.descricao,
+
+        usuario: "Augusto",
+
+        campo: "Prazo",
+
+        valor_antigo:
+          prazoAnterior,
+
+        valor_novo:
+          prazos[id],
+
+        data_alteracao:
+          new Date().toISOString(),
+      },
+    ]);
+}
 
     carregarAcoes();
   }
