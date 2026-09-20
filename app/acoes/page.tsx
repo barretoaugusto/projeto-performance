@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function AcoesPage() {
   const [acoes, setAcoes] = useState<any[]>([]);
@@ -9,7 +10,7 @@ export default function AcoesPage() {
   const [responsavel, setResponsavel] = useState("");
   const [prazo, setPrazo] = useState("");
   const [status, setStatus] = useState("Aberta");
-
+  const router = useRouter();
   const [filtroStatus, setFiltroStatus] =
     useState("Todos");
 
@@ -63,6 +64,44 @@ export default function AcoesPage() {
 
     carregarAcoes();
   }
+
+  function calcularStatus(acao: any) {
+
+  if (acao.status === "Concluída") {
+    return "🟢 Concluída";
+  }
+
+  if (
+    acao.prazo &&
+    new Date(acao.prazo) < new Date()
+  ) {
+    return "🔴 Atrasada";
+  }
+
+  return "🟡 Em Andamento";
+}
+
+function calcularPrazo(acao: any) {
+
+  if (acao.status === "Concluída") {
+    return "✅ Dentro do Prazo";
+  }
+
+  const hoje = new Date();
+  const prazo = new Date(acao.prazo);
+
+  const diferenca =
+    Math.ceil(
+      (prazo.getTime() - hoje.getTime()) /
+      (1000 * 60 * 60 * 24)
+    );
+
+  if (diferenca < 0) {
+    return `🚨 Atrasada há ${Math.abs(diferenca)} dias`;
+  }
+
+  return `⚠️ Vence em ${diferenca} dias`;
+}
 
   async function atualizarStatus(
     id: string,
@@ -223,11 +262,86 @@ if (
     carregarAcoes();
   }
 
+  const totalAcoes = acoes.length;
+
+const concluidas = acoes.filter(
+  (a) => calcularStatus(a).includes("Concluída")
+).length;
+
+const andamento = acoes.filter(
+  (a) => calcularStatus(a).includes("Andamento")
+).length;
+
+const atrasadas = acoes.filter(
+  (a) => calcularPrazo(a).includes("Atrasada")
+).length;
+
+const percentualConclusao =
+  totalAcoes > 0
+    ? Math.round(
+        (concluidas / totalAcoes) * 100
+      )
+    : 0;
+
   return (
     <main className="p-10 bg-slate-100 min-h-screen">
       <h1 className="text-3xl font-bold text-black mb-8">
         Plano de Ação
       </h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+
+  <div className="bg-white p-4 rounded shadow">
+    <h3 className="text-gray-500">
+      Total de Ações
+    </h3>
+
+    <p className="text-3xl font-bold">
+      {totalAcoes}
+    </p>
+  </div>
+
+  <div className="bg-green-100 p-4 rounded shadow">
+    <h3>
+      Concluídas
+    </h3>
+
+    <p className="text-3xl font-bold text-green-700">
+      {concluidas}
+    </p>
+  </div>
+
+  <div className="bg-yellow-100 p-4 rounded shadow">
+    <h3>
+      Em Andamento
+    </h3>
+
+    <p className="text-3xl font-bold text-yellow-700">
+      {andamento}
+    </p>
+  </div>
+
+  <div className="bg-red-100 p-4 rounded shadow">
+    <h3>
+      Atrasadas
+    </h3>
+
+    <p className="text-3xl font-bold text-red-700">
+      {atrasadas}
+    </p>
+  </div>
+
+  <div className="bg-blue-100 p-4 rounded shadow">
+    <h3>
+      % Conclusão
+    </h3>
+
+    <p className="text-3xl font-bold text-blue-700">
+      {percentualConclusao}%
+    </p>
+  </div>
+
+</div>
 
       <div className="bg-white p-6 rounded shadow mb-6">
         <input
@@ -370,17 +484,32 @@ if (
                 💾 Salvar Dados
               </button>
 
+              <button
+                onClick={() =>
+                router.push(
+               `/historico?acao=${acao.id}`
+                )
+              }
+              className="bg-slate-700 text-white px-3 py-1 rounded"
+              >
+               📜 Histórico
+              </button>
+
               <p className="text-gray-700 mt-2">
                 Responsável:{" "}
                 {acao.responsavel}
               </p>
 
               <p className="text-gray-700">
-                Prazo: {acao.prazo}
+               Prazo: {acao.prazo}
               </p>
 
               <p className="font-semibold text-blue-600">
-                Status: {acao.status}
+               Status: {calcularStatus(acao)}
+              </p>
+
+              <p className="font-semibold text-blue-600">
+               Situação: {calcularPrazo(acao)}
               </p>
 
               <div className="mt-3 flex gap-2 flex-wrap">
@@ -431,6 +560,7 @@ if (
                 >
                   ✅ Concluída
                 </button>
+
               </div>
             </div>
           ))}

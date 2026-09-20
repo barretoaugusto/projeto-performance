@@ -2,29 +2,55 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { useSearchParams } from "next/navigation";
 
 export default function HistoricoPage() {
+  const searchParams = useSearchParams();
+  const acaoId = searchParams.get("acao");
+   console.log("AÇÃO ID:", acaoId);
+  
   const [historico, setHistorico] = useState<any[]>([]);
 
   useEffect(() => {
+  if (acaoId) {
     carregarHistorico();
-  }, []);
+  }
+}, [acaoId]);
 
   async function carregarHistorico() {
-    const { data, error } = await supabase
+
+    console.log("Filtro:", acaoId);
+
+  let query =
+    supabase
       .from("acoes_historico")
       .select("*")
       .order("data_alteracao", {
-        ascending: false,
-      });
+  ascending: false,
+});
 
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    setHistorico(data || []);
+  if (acaoId) {
+    query =
+      query.eq(
+        "acao_id",
+        acaoId
+      );
   }
+
+const { data, error } = await query;
+
+console.log("ERRO:", error);
+console.log("DATA:", data);
+
+if (!error && data) {
+  setHistorico(data);
+}
+
+  if (!error && data) {
+    setHistorico(data);
+  }
+  console.log("Retorno:", data);
+}
 
   return (
     <main className="p-10 bg-slate-100 min-h-screen">
