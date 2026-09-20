@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { useRouter } from "next/navigation";
 
 import {
   PieChart,
@@ -37,6 +38,25 @@ export default function Home() {
   const [dentroPrazo, setDentroPrazo] = useState(0);
   const [rankingResponsaveis, setRankingResponsaveis] = useState<any[]>([]);
   const [horasPorCliente, setHorasPorCliente] = useState<any[]>([]);
+  const router = useRouter();
+
+useEffect(() => {
+
+  async function verificarLogin() {
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push("/login");
+    }
+
+  }
+
+  verificarLogin();
+
+}, []);
   const dadosStatus = [
   {
     name: "Abertas",

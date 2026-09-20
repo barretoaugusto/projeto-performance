@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { supabase } from "../lib/supabase";
 
 export default function Menu() {
   const router = useRouter();
@@ -60,6 +61,19 @@ export default function Menu() {
           className="text-left hover:bg-slate-700 p-2 rounded"
         >
           📎 Evidências
+        </button>
+
+        <button
+          onClick={async () => {
+
+         await supabase.auth.signOut();
+
+         router.push("/login");
+
+         }}
+         className="text-red-500"
+        >
+         🚪 Sair
         </button>
 
       </nav>

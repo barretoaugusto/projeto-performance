@@ -2,22 +2,39 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function LancamentosPage() {
   const [clientes, setClientes] = useState<any[]>([]);
   const [programas, setProgramas] = useState<any[]>([]);
   const [projetos, setProjetos] = useState<any[]>([]);
-
   const [clienteId, setClienteId] = useState("");
   const [programaId, setProgramaId] = useState("");
   const [projetoId, setProjetoId] = useState("");
-
   const [dataLancamento, setDataLancamento] = useState("");
   const [horaInicio, setHoraInicio] = useState("");
   const [horaFim, setHoraFim] = useState("");
-
   const [atividades, setAtividades] = useState("");
   const [problemas, setProblemas] = useState("");
+  const router = useRouter();
+
+useEffect(() => {
+
+  async function verificarLogin() {
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push("/login");
+    }
+
+  }
+
+  verificarLogin();
+
+}, []);
   const [proximosPassos, setProximosPassos] = useState("");
 
   useEffect(() => {

@@ -2,17 +2,33 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function ProjetosPage() {
   const [projetos, setProjetos] = useState<any[]>([]);
   const [programas, setProgramas] = useState<any[]>([]);
-
-  const [mostrarFormulario, setMostrarFormulario] =
-    useState(false);
-
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [programaId, setProgramaId] = useState("");
-
   const [nome, setNome] = useState("");
+  const router = useRouter();
+
+useEffect(() => {
+
+  async function verificarLogin() {
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push("/login");
+    }
+
+  }
+
+  verificarLogin();
+
+}, []);
   const [tipo, setTipo] = useState("");
 
   useEffect(() => {
