@@ -8,35 +8,11 @@ export default function Evidencias() {
   const [acaoId, setAcaoId] =
     useState("");
 
-  const [acoes, setAcoes] =
+  const [evidencias, setEvidencias] =
     useState<any[]>([]);
 
-    <div className="mb-4">
-  <label className="block text-black mb-2">
-    Ação
-  </label>
-
-  <select
-    value={acaoId}
-    onChange={(e) =>
-      setAcaoId(e.target.value)
-    }
-    className="border p-2 w-full text-black"
-  >
-    <option value="">
-      Selecione uma ação
-    </option>
-
-    {acoes.map((acao) => (
-      <option
-        key={acao.id}
-        value={acao.id}
-      >
-        {acao.descricao}
-      </option>
-    ))}
-  </select>
-</div>
+  const [acoes, setAcoes] =
+    useState<any[]>([]);
 
   const [categoria, setCategoria] =
     useState("");
@@ -51,8 +27,9 @@ export default function Evidencias() {
     useState<File | null>(null);
 
   useEffect(() => {
-    carregarAcoes();
-  }, []);
+  carregarAcoes();
+  carregarEvidencias();
+}, []);
 
   async function carregarAcoes() {
   const { data } =
@@ -64,101 +41,31 @@ export default function Evidencias() {
     setAcoes(data);
   }
   }
-
+  
 async function salvarEvidencia() {
   try {
 
-    if (!acaoId) {
-      alert("Selecione uma ação");
-      return;
-    }
-
-    let fotoAntesUrl = "";
-    let fotoDepoisUrl = "";
-
-    if (fotoAntes) {
-
-      const nomeArquivo =
-        `antes-${Date.now()}-${fotoAntes.name}`;
-
-      const { error } =
-        await supabase.storage
-          .from("evidencias")
-          .upload(
-            nomeArquivo,
-            fotoAntes
-          );
-          console.log(
-  "UPLOAD ANTES",
-  error
-);
-
-      if (!error) {
-
-        fotoAntesUrl =
-          supabase.storage
-            .from("evidencias")
-            .getPublicUrl(nomeArquivo)
-            .data.publicUrl;
-      }
-    }
-
-    if (fotoDepois) {
-
-      const nomeArquivo =
-        `depois-${Date.now()}-${fotoDepois.name}`;
-
-      const { error } =
-  await supabase.storage
-    .from("evidencias")
-    .upload(
-      nomeArquivo,
-      fotoDepois
-    );
-
-console.log(
-  "UPLOAD DEPOIS",
-  error
-);
-
-      if (!error) {
-
-        fotoDepoisUrl =
-          supabase.storage
-            .from("evidencias")
-            .getPublicUrl(nomeArquivo)
-            .data.publicUrl;
-      }
-    }
-
-    const { error } =
-      await supabase
-        .from("evidencias")
-        .insert([
-          {
-            acao_id: acaoId,
-            categoria,
-            descricao,
-            foto_antes: fotoAntesUrl,
-            foto_depois: fotoDepoisUrl,
-          },
-        ]);
-
-    if (error) {
-      console.error(error);
-      alert("Erro ao salvar evidência");
-      return;
-    }
-
-    alert("Evidência salva com sucesso!");
-
   } catch (error) {
-
     console.error(error);
 
     alert(
       "Erro ao salvar evidência"
     );
+  }
+}
+
+async function carregarEvidencias() {
+
+  const { data, error } =
+    await supabase
+      .from("evidencias")
+      .select("*")
+      .order("criado_em", {
+        ascending: false,
+      });
+
+  if (!error && data) {
+    setEvidencias(data);
   }
 }
 
@@ -197,76 +104,128 @@ console.log(
   </select>
 </div>
 
-        <div className="mb-4">
-          <label className="block text-black mb-2">
-            Categoria
-          </label>
+<div className="mb-4">
+  <label className="block text-black mb-2">
+    Categoria
+  </label>
 
-          <input
-            type="text"
-            value={categoria}
-            onChange={(e) =>
-              setCategoria(e.target.value)
-            }
-            className="border p-2 w-full text-black"
-          />
-        </div>
+  <input
+    type="text"
+    value={categoria}
+    onChange={(e) =>
+      setCategoria(e.target.value)
+    }
+    className="border p-2 w-full text-black"
+  />
+</div>
 
-        <div className="mb-4">
-          <label className="block text-black mb-2">
-            Descrição
-          </label>
+<div className="mb-4">
+  <label className="block text-black mb-2">
+    Descrição
+  </label>
 
-          <textarea
-            value={descricao}
-            onChange={(e) =>
-              setDescricao(e.target.value)
-            }
-            className="border p-2 w-full text-black"
-          />
-        </div>
+  <textarea
+    value={descricao}
+    onChange={(e) =>
+      setDescricao(e.target.value)
+    }
+    className="border p-2 w-full text-black"
+  />
+</div>
 
-        <div className="mb-4">
-          <label className="block text-black mb-2">
-            Foto Antes
-          </label>
+<div className="mb-4">
+  <label className="block text-black mb-2">
+    Foto Antes
+  </label>
 
-          <input
-         type="file"
-            className="text-black"
-            onChange={(e) =>
-            setFotoAntes(
-            e.target.files?.[0] || null
-    )
-  }
-/>
-        </div>
+  <input
+    type="file"
+    className="text-black"
+    onChange={(e) =>
+      setFotoAntes(
+        e.target.files?.[0] || null
+      )
+    }
+  />
+</div>
 
-        <div className="mb-4">
-          <label className="block text-black mb-2">
-            Foto Depois
-          </label>
+<div className="mb-4">
+  <label className="block text-black mb-2">
+    Foto Depois
+  </label>
 
-          <input
-            type="file"
-            className="text-black"
-             onChange={(e) =>
-             setFotoDepois(
-             e.target.files?.[0] || null
-    )
-  }
-/>
+  <input
+    type="file"
+    className="text-black"
+    onChange={(e) =>
+      setFotoDepois(
+        e.target.files?.[0] || null
+      )
+    }
+  />
+</div>
 
-        </div>
-
-        <button
+<button
   onClick={salvarEvidencia}
   className="bg-blue-600 text-white px-4 py-2 rounded"
 >
   Salvar Evidência
 </button>
+</div>
 
-      </div>
-    </main>
+{evidencias.map((evidencia) => (
+  <div
+    key={evidencia.id}
+    className="border rounded p-4 mb-4">
+    <p className="text-black">
+      <strong>Categoria:</strong>{" "}
+      {evidencia.categoria}
+    </p>
+
+    <p className="text-black">
+      <strong>Descrição:</strong>{" "}
+      {evidencia.descricao}
+    </p>
+
+    <p className="text-black">
+      <strong>Ação:</strong>{" "}
+      {
+        acoes.find(
+          (acao) =>
+            acao.id === evidencia.acao_id
+        )?.descricao || "Ação não encontrada"
+      }
+    </p>
+
+   <div className="flex gap-6 mt-4">
+
+  {evidencia.foto_antes && (
+  <div>
+    <p className="text-black font-bold mb-2">
+      Foto Antes
+    </p>
+
+    <img width={150}height={150}
+  src={evidencia.foto_antes}
+  alt="Foto Antes"></img>
+  </div>
+)}
+
+{evidencia.foto_depois && (
+  <div>
+    <p className="text-black font-bold mb-2">
+      Foto Depois
+    </p>
+
+    <img width={150}height={150}
+  src={evidencia.foto_depois}
+  alt="Foto Depois">
+  </img>
+  </div>
+)}
+</div>
+</div>
+))}
+</main>
   );
 }
