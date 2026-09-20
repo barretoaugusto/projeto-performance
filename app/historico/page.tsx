@@ -1,10 +1,21 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function HistoricoPage() {
+export default function Page() {
+  return (
+    <Suspense fallback={<p>Carregando...</p>}>
+      <HistoricoPage />
+    </Suspense>
+  );
+}
+
+function HistoricoPage() {
   const searchParams = useSearchParams();
   const acaoId = searchParams.get("acao");
    console.log("AÇÃO ID:", acaoId);
