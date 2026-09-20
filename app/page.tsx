@@ -35,6 +35,8 @@ export default function Home() {
   const [acoesVencidas, setAcoesVencidas] = useState(0);
   const [vencendo7Dias, setVencendo7Dias] = useState(0);
   const [dentroPrazo, setDentroPrazo] = useState(0);
+  const [rankingResponsaveis, setRankingResponsaveis] = useState<any[]>([]);
+  const [horasPorCliente, setHorasPorCliente] = useState<any[]>([]);
   const dadosStatus = [
   {
     name: "Abertas",
@@ -78,8 +80,7 @@ useEffect(() => {
     
   console.log(
   "responsaveisResult",
-  responsaveisResult.data
-);
+  responsaveisResult.data);
     const clientesResult = await supabase
       .from("clientes")
       .select("*", { count: "exact", head: true });
@@ -95,6 +96,19 @@ useEffect(() => {
     const lancamentosResult = await supabase
       .from("lancamentos")
       .select("*", { count: "exact", head: true });
+
+    const horasClienteResult = await supabase
+      .from("lancamentos")
+      .select("cliente_id, horas_trabalhadas");
+
+    const clientesLista = await supabase
+      .from("clientes")
+      .select("id, nome_fantasia, razao_social");
+
+   console.log(
+  "horasClienteResult",
+  horasClienteResult.data
+);
 
     const horasResult = await supabase
       .from("lancamentos")
@@ -210,6 +224,65 @@ const dadosResponsavel =
       total,
     })
   );
+
+const ranking =
+  [...dadosResponsavel]
+    .sort(
+      (a, b) =>
+        b.total - a.total
+    )
+    .slice(0, 5);
+
+const horasAgrupadas: Record<string, number> = {};
+
+horasClienteResult.data?.forEach(
+  (item: any) => {
+    const cliente =
+     item.cliente_id ||
+     "Sem Cliente";
+
+    horasAgrupadas[cliente] =
+      (horasAgrupadas[cliente] || 0) +
+      Number(
+        item.horas_trabalhadas || 0
+      );
+  }
+);
+
+const rankingHoras =
+  Object.entries(
+    horasAgrupadas
+  )
+    .map(([clienteId, horas]) => {
+
+      const cliente =
+        clientesLista.data?.find(
+          (c: any) =>
+            c.id === clienteId
+        );
+
+      return {
+        cliente:
+          cliente?.nome_fantasia ||
+          cliente?.razao_social ||
+          clienteId,
+
+        horas,
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.horas - a.horas
+    );
+
+setHorasPorCliente(
+  rankingHoras
+);
+
+setRankingResponsaveis(
+  ranking
+);
+
 console.log(
   "responsaveisResult",
   responsaveisResult.data
@@ -230,9 +303,7 @@ setAcoesConcluidas(concluidas);
 setAcoesAndamento(andamento);
 setAcoesPausadas(pausadas);
 setAcoesCanceladas(canceladas);
-setAcoesAtivas(
-  abertas + andamento + pausadas
-);
+setAcoesAtivas(abertas + andamento + pausadas);
 setAcoesVencidas(vencidas);
 setVencendo7Dias(vencendo);
 setDentroPrazo(dentro);
@@ -465,6 +536,54 @@ console.log(
     </ResponsiveContainer>
   </div>
 </div>
+
+<div className="bg-white p-6 rounded shadow mt-8">
+  <h2 className="text-2xl font-bold text-black mb-4">
+    🏆 Ranking de Responsáveis
+  </h2>
+
+  {rankingResponsaveis.map(
+    (item, index) => (
+      <div
+  key={item.nome}
+  className="flex justify-between border-b py-2 text-black"
+>
+        <span className="text-black">
+  {index + 1}º {item.nome}
+</span>
+
+<span className="font-bold text-black">
+  {item.total} ações
+</span>
+      </div>
+    )
+  )}
+</div>
+
+<div className="bg-white p-6 rounded shadow mt-8">
+  <h2 className="text-2xl font-bold text-black mb-4">
+    ⏱ Horas por Cliente
+  </h2>
+
+  {horasPorCliente.map(
+    (item, index) => (
+      <div
+  key={item.cliente}
+  className="flex justify-between border-b py-2 text-black"
+>
+  <span>
+    {index + 1}º {item.cliente}
+  </span>
+
+  <span className="font-bold">
+    {item.horas}h
+  </span>
+</div>
+
+    )
+  )}
+</div>
+
 </main>
 );
 }
