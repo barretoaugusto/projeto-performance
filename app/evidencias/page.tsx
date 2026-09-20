@@ -69,14 +69,37 @@ async function carregarEvidencias() {
     setEvidencias(data);
   }
 }
-function gerarPDF() {
+
+async function imageToBase64(url: string) {
+  const response = await fetch(url);
+
+  const blob = await response.blob();
+
+  return new Promise<string>((resolve) => {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function gerarPDF(evidencia: any) {
 
   const pdf = new jsPDF();
+
+  const nomeAcao =
+    acoes.find(
+      (acao) =>
+        acao.id === evidencia.acao_id
+    )?.descricao || "";
 
   pdf.setFontSize(18);
 
   pdf.text(
-    "Relatório de Evidências",
+    "Relatório de Evidência",
     20,
     20
   );
@@ -84,16 +107,83 @@ function gerarPDF() {
   pdf.setFontSize(12);
 
   pdf.text(
-    `Data: ${new Date().toLocaleDateString()}`,
+    `Ação: ${nomeAcao}`,
     20,
-    35
+    40
   );
+
+  pdf.text(
+    `Categoria: ${evidencia.categoria}`,
+    20,
+    50
+  );
+
+  pdf.text(
+    `Descrição: ${evidencia.descricao}`,
+    20,
+    60
+  );
+
+  pdf.text(
+    `Emitido em: ${new Date().toLocaleDateString()}`,
+    20,
+    75
+  );
+
+  let posY = 90;
+
+  if (evidencia.foto_antes) {
+
+    const imgAntes =
+      await imageToBase64(
+        evidencia.foto_antes
+      );
+
+    pdf.text(
+      "Foto Antes",
+      20,
+      posY
+    );
+
+    pdf.addImage(
+      imgAntes,
+      "JPEG",
+      20,
+      posY + 5,
+      60,
+      60
+    );
+
+    posY += 75;
+  }
+
+  if (evidencia.foto_depois) {
+
+    const imgDepois =
+      await imageToBase64(
+        evidencia.foto_depois
+      );
+
+    pdf.text(
+      "Foto Depois",
+      20,
+      posY
+    );
+
+    pdf.addImage(
+      imgDepois,
+      "JPEG",
+      20,
+      posY + 5,
+      60,
+      60
+    );
+  }
 
   pdf.save(
-    "Relatorio_Evidencias.pdf"
+    `evidencia-${evidencia.id}.pdf`
   );
 }
-
 
   return (
     <main className="p-10 bg-slate-100 min-h-screen">
@@ -254,8 +344,10 @@ function gerarPDF() {
 </div>
 
 <button
-  onClick={gerarPDF}
-  className="bg-green-600 text-white px-4 py-2 rounded mb-4"
+  onClick={() =>
+    gerarPDF(evidencia)
+  }
+  className="bg-green-600 text-white px-4 py-2 rounded mt-4"
 >
   📄 Gerar PDF
 </button>
