@@ -55,6 +55,13 @@ export default function Menu() {
           ✅ Plano de Ação
         </button>
 
+        <button
+          onClick={() => router.push("/evidencias")}
+          className="text-left hover:bg-slate-700 p-2 rounded"
+        >
+          📎 Evidências
+        </button>
+
       </nav>
     </aside>
   );
