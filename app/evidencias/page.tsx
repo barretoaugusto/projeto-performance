@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import jsPDF from "jspdf";
 
 export default function Evidencias() {
 
@@ -68,6 +69,31 @@ async function carregarEvidencias() {
     setEvidencias(data);
   }
 }
+function gerarPDF() {
+
+  const pdf = new jsPDF();
+
+  pdf.setFontSize(18);
+
+  pdf.text(
+    "Relatório de Evidências",
+    20,
+    20
+  );
+
+  pdf.setFontSize(12);
+
+  pdf.text(
+    `Data: ${new Date().toLocaleDateString()}`,
+    20,
+    35
+  );
+
+  pdf.save(
+    "Relatorio_Evidencias.pdf"
+  );
+}
+
 
   return (
     <main className="p-10 bg-slate-100 min-h-screen">
@@ -171,6 +197,7 @@ async function carregarEvidencias() {
 >
   Salvar Evidência
 </button>
+
 </div>
 
 {evidencias.map((evidencia) => (
@@ -223,7 +250,16 @@ async function carregarEvidencias() {
   </img>
   </div>
 )}
+
 </div>
+
+<button
+  onClick={gerarPDF}
+  className="bg-green-600 text-white px-4 py-2 rounded mb-4"
+>
+  📄 Gerar PDF
+</button>
+
 </div>
 ))}
 </main>
