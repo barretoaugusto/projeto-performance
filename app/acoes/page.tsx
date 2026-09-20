@@ -96,7 +96,7 @@ export default function AcoesPage() {
       acao_descricao:
         acaoAtual?.descricao,
 
-      usuario: "Augusto",
+      usuario: "user.nome",
 
       campo: "Status",
 
@@ -177,7 +177,7 @@ if (
         acao_descricao:
           acaoAtual?.descricao,
 
-        usuario: "Augusto",
+        usuario: "user.nome",
 
         campo: "Responsável",
 
@@ -204,7 +204,7 @@ if (
         acao_descricao:
           acaoAtual?.descricao,
 
-        usuario: "Augusto",
+        usuario: "user.nome",
 
         campo: "Prazo",
 

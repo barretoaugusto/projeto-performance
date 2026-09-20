@@ -3,6 +3,20 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
+
 export default function Home() {
   const [clientes, setClientes] = useState(0);
   const [programas, setProgramas] = useState(0);
@@ -17,12 +31,55 @@ export default function Home() {
   const [taxaConclusao, setTaxaConclusao] = useState(0);
   const [acoesAtivas, setAcoesAtivas] = useState(0);
   const [eficiencia, setEficiencia] = useState(0);
-  
-  useEffect(() => {
-    carregarIndicadores();
-  }, []);
+  const [acoesPorResponsavel, setAcoesPorResponsavel] = useState<any[]>([]);
+  const [acoesVencidas, setAcoesVencidas] = useState(0);
+  const [vencendo7Dias, setVencendo7Dias] = useState(0);
+  const [dentroPrazo, setDentroPrazo] = useState(0);
+  const dadosStatus = [
+  {
+    name: "Abertas",
+    value: acoesAbertas,
+  },
+  {
+    name: "Em Andamento",
+    value: acoesAndamento,
+  },
+  {
+    name: "Pausadas",
+    value: acoesPausadas,
+  },
+  {
+    name: "Concluídas",
+    value: acoesConcluidas,
+  },
+  {
+    name: "Canceladas",
+    value: acoesCanceladas,
+  },
+];
+
+const COLORS = [
+  "#f97316",
+  "#2563eb",
+  "#eab308",
+  "#16a34a",
+  "#dc2626",
+];
+
+useEffect(() => {
+  carregarIndicadores();
+}, []);
 
   async function carregarIndicadores() {
+    const responsaveisResult =
+  await supabase
+    .from("acoes")
+    .select("responsavel");
+    
+  console.log(
+  "responsaveisResult",
+  responsaveisResult.data
+);
     const clientesResult = await supabase
       .from("clientes")
       .select("*", { count: "exact", head: true });
@@ -54,20 +111,64 @@ export default function Home() {
   .from("acoes")
   .select("status");
 
+  const prazosResult = await supabase
+  .from("acoes")
+  .select("prazo,status");
+
+      const hoje = new Date();
+
+let vencidas = 0;
+let vencendo = 0;
+let dentro = 0;
+
+prazosResult.data?.forEach(
+  (acao: any) => {
+
+    if (
+      acao.status ===
+      "Concluída"
+    ) {
+      return;
+    }
+
+    const prazo =
+      new Date(acao.prazo);
+
+    const diferencaDias =
+      Math.ceil(
+        (
+          prazo.getTime() -
+          hoje.getTime()
+        ) /
+        (1000 * 60 * 60 * 24)
+      );
+
+    if (diferencaDias < 0) {
+      vencidas++;
+    } else if (
+      diferencaDias <= 7
+    ) {
+      vencendo++;
+    } else {
+      dentro++;
+    }
+  }
+);
+
     const abertas = acoesResult.data?.filter(
     (acao: any) => acao.status === "Aberta"
   ).length || 0;
 
-const concluidas =
+    const concluidas =
   acoesResult.data?.filter(
     (acao: any) => acao.status === "Concluída"
   ).length || 0;
-  const andamento =
+    const andamento =
   acoesResult.data?.filter(
     (acao: any) => acao.status === "Em Andamento"
   ).length || 0;
 
-const pausadas =
+    const pausadas =
   acoesResult.data?.filter(
     (acao: any) => acao.status === "Pausada"
   ).length || 0;
@@ -85,19 +186,45 @@ const eficienciaCalc =
         ) * 100
       )
     : 0;
+const agrupado: Record<
+  string,
+  number
+> = {};
+
+responsaveisResult.data?.forEach(
+  (item: any) => {
+    const nome =
+  (item.responsavel || "Não Definido")
+    .trim()
+    .toUpperCase();
+
+    agrupado[nome] =
+      (agrupado[nome] || 0) + 1;
+  }
+);
+
+const dadosResponsavel =
+  Object.entries(agrupado).map(
+    ([nome, total]) => ({
+      nome,
+      total,
+    })
+  );
+console.log(
+  "responsaveisResult",
+  responsaveisResult.data
+);
+
+console.log(
+  "dadosResponsavel",
+  dadosResponsavel
+);
+
+setAcoesPorResponsavel(
+  dadosResponsavel
+);
 
 setEficiencia(eficienciaCalc);
-
-<div className="bg-white p-6 rounded shadow">
-  <h2 className="text-gray-600">
-    Taxa Conclusão
-  </h2>
-
-  <p className="text-4xl font-bold text-green-700">
-    {taxaConclusao}%
-  </p>
-</div>
-
 setAcoesAbertas(abertas);
 setAcoesConcluidas(concluidas);
 setAcoesAndamento(andamento);
@@ -106,17 +233,9 @@ setAcoesCanceladas(canceladas);
 setAcoesAtivas(
   abertas + andamento + pausadas
 );
-
-<div className="bg-white p-6 rounded shadow">
-  <h2 className="text-gray-600">
-    Ações Ativas
-  </h2>
-
-  <p className="text-4xl font-bold text-blue-700">
-    {acoesAtivas}
-  </p>
-</div>
-
+setAcoesVencidas(vencidas);
+setVencendo7Dias(vencendo);
+setDentroPrazo(dentro);
 
 const totalAcoes =
   abertas +
@@ -141,123 +260,211 @@ setTaxaConclusao(taxa);
     setHoras(totalHoras);
   }
 
+console.log("dadosStatus", dadosStatus);
+console.log(
+  "acoesPorResponsavel",
+  acoesPorResponsavel
+);
+
   return (
     <main className="p-10 bg-slate-100 min-h-screen">
       <h1 className="text-4xl font-bold mb-10 text-black">
         Desempenho do Projeto
       </h1>
 
-      <div className="grid grid-cols-10 gap-6">
+      <div className="grid grid-cols-4 gap-6">
 
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="text-gray-600">
-            Clientes
-          </h2>
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Clientes</h2>
+    <p className="text-4xl font-bold text-black">
+      {clientes}
+    </p>
+  </div>
 
-          <p className="text-4xl font-bold text-black">
-            {clientes}
-          </p>
-        </div>
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Programas</h2>
+    <p className="text-4xl font-bold text-black">
+      {programas}
+    </p>
+  </div>
 
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="text-gray-600">
-            Programas
-          </h2>
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Projetos</h2>
+    <p className="text-4xl font-bold text-black">
+      {projetos}
+    </p>
+  </div>
 
-          <p className="text-4xl font-bold text-black">
-            {programas}
-          </p>
-        </div>
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Lançamentos</h2>
+    <p className="text-4xl font-bold text-black">
+      {lancamentos}
+    </p>
+  </div>
 
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="text-gray-600">
-            Projetos
-          </h2>
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Horas</h2>
+    <p className="text-4xl font-bold text-black">
+      {horas}h
+    </p>
+  </div>
 
-          <p className="text-4xl font-bold text-black">
-            {projetos}
-          </p>
-        </div>
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Ações Abertas</h2>
+    <p className="text-4xl font-bold text-orange-600">
+      {acoesAbertas}
+    </p>
+  </div>
 
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="text-gray-600">
-            Lançamentos
-          </h2>
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Ações Concluídas</h2>
+    <p className="text-4xl font-bold text-green-600">
+      {acoesConcluidas}
+    </p>
+  </div>
 
-          <p className="text-4xl font-bold text-black">
-            {lancamentos}
-          </p>
-        </div>
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Em Andamento</h2>
+    <p className="text-4xl font-bold text-blue-600">
+      {acoesAndamento}
+    </p>
+  </div>
 
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="text-gray-600">
-            Horas
-          </h2>
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Pausadas</h2>
+    <p className="text-4xl font-bold text-yellow-600">
+      {acoesPausadas}
+    </p>
+  </div>
 
-          <p className="text-4xl font-bold text-black">
-            {horas}h
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded shadow">
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Canceladas</h2>
+    <p className="text-4xl font-bold text-red-600">
+      {acoesCanceladas}
+    </p>
+  </div>
+
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Eficiência</h2>
+    <p className="text-4xl font-bold text-purple-700">
+      {eficiencia}%
+    </p>
+  </div>
+
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Taxa Conclusão</h2>
+    <p className="text-4xl font-bold text-green-700">
+      {taxaConclusao}%
+    </p>
+  </div>
+
+  <div className="bg-white p-6 rounded shadow">
+    <h2 className="text-gray-600">Ações Ativas</h2>
+    <p className="text-4xl font-bold text-blue-700">
+      {acoesAtivas}
+    </p>
+  </div>
+
+  <div className="bg-white p-6 rounded shadow">
   <h2 className="text-gray-600">
-    Ações Abertas
-  </h2>
-
-  <p className="text-4xl font-bold text-orange-600">
-    {acoesAbertas}
-  </p>
-</div>
-
-<div className="bg-white p-6 rounded shadow">
-  <h2 className="text-gray-600">
-    Ações Concluídas
-  </h2>
-
-  <p className="text-4xl font-bold text-green-600">
-    {acoesConcluidas}
-  </p>
-</div>
-<div className="bg-white p-6 rounded shadow">
-  <h2 className="text-gray-600">
-    Em Andamento
-  </h2>
-
-  <p className="text-4xl font-bold text-blue-600">
-    {acoesAndamento}
-  </p>
-</div>
-
-<div className="bg-white p-6 rounded shadow">
-  <h2 className="text-gray-600">
-    Pausadas
-  </h2>
-
-  <p className="text-4xl font-bold text-yellow-600">
-    {acoesPausadas}
-  </p>
-</div>
-
-<div className="bg-white p-6 rounded shadow">
-  <h2 className="text-gray-600">
-    Canceladas
+    Ações Vencidas
   </h2>
 
   <p className="text-4xl font-bold text-red-600">
-    {acoesCanceladas}
+    {acoesVencidas}
   </p>
 </div>
 
 <div className="bg-white p-6 rounded shadow">
   <h2 className="text-gray-600">
-    Eficiência
+    Vencem em 7 dias
   </h2>
 
-  <p className="text-4xl font-bold text-purple-700">
-    {eficiencia}%
+  <p className="text-4xl font-bold text-yellow-600">
+    {vencendo7Dias}
   </p>
 </div>
 
-      </div>
-    </main>
-  );
+<div className="bg-white p-6 rounded shadow">
+  <h2 className="text-gray-600">
+    Dentro do Prazo
+  </h2>
+
+  <p className="text-4xl font-bold text-green-600">
+    {dentroPrazo}
+  </p>
+</div>
+
+</div>
+
+<div className="bg-white p-6 rounded shadow mt-8">
+  <h2 className="text-2xl font-bold text-black mb-4">
+    Status das Ações
+  </h2>
+
+  <div style={{ width: "100%", height: 500 }}>
+    <ResponsiveContainer>
+      <PieChart>
+        <Pie
+  data={dadosStatus}
+  isAnimationActive={false}
+          cx="50%"
+          cy="50%"
+          outerRadius={160}
+          dataKey="value"
+          label={({ name, value }) =>
+  `${name}: ${value}`
+}
+        >
+          {dadosStatus.map(
+            (entry, index) => (
+              <Cell
+                key={index}
+                fill={
+                  COLORS[index %
+                    COLORS.length]
+                }
+              />
+            )
+          )}
+        </Pie>
+
+        <Tooltip />
+        <Legend />
+      </PieChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+<div className="bg-white p-6 rounded shadow mt-8">
+  <h2 className="text-2xl font-bold text-black mb-4">
+    Ações por Responsável
+  </h2>
+
+  <div
+    style={{
+      width: "100%",
+      height: 400,
+    }}
+  >
+    <ResponsiveContainer>
+      <BarChart
+  width={500}
+  height={300}
+  data={acoesPorResponsavel}
+>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="nome" />
+        <YAxis />
+        <Tooltip />
+
+        <Bar
+          dataKey="total"
+          fill="#2563eb"
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+</main>
+);
 }
