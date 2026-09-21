@@ -299,6 +299,26 @@ const percentualConclusao =
       )
     : 0;
 
+function calcularTempoPrevisto(acao: any) {
+
+  if (
+    !acao.inicio_previsto ||
+    !acao.fim_previsto
+  ) {
+    return "-";
+  }
+
+  const inicio = new Date(acao.inicio_previsto);
+  const fim = new Date(acao.fim_previsto);
+
+  const dias = Math.ceil(
+    (fim.getTime() - inicio.getTime()) /
+    (1000 * 60 * 60 * 24)
+  );
+
+  return `${dias} dias`;
+}
+
   return (
     <main className="p-10 bg-slate-100 min-h-screen">
       <h1 className="text-3xl font-bold text-black mb-8">
@@ -308,14 +328,19 @@ const percentualConclusao =
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
 
   <div className="bg-white p-4 rounded shadow">
-    <h3 className="text-gray-500">
-      Total de Ações
-    </h3>
 
-    <p className="text-3xl font-bold">
-      {totalAcoes}
-    </p>
-  </div>
+  <h3 className="text-black font-semibold">
+    Total de Ações
+  </h3>
+
+  <p
+  className="text-3xl font-bold"
+  style={{ color: "#000000" }}
+>
+  {totalAcoes}
+</p>
+
+</div>
 
   <div className="bg-green-100 p-4 rounded shadow">
 
@@ -519,6 +544,24 @@ const percentualConclusao =
                📜 Histórico
               </button>
 
+              <p>
+             Início:
+             {" "}
+             {acao.inicio_previsto}
+            </p>
+
+            <p>
+             Prazo:
+             {" "}
+             {acao.fim_previsto}
+            </p>
+
+            <p>
+              Tempo Previsto:
+             {" "}
+              {calcularTempoPrevisto(acao)}
+            </p>
+
               <p className="text-gray-700 mt-2">
                 Responsável:{" "}
                 {acao.responsavel}
@@ -586,6 +629,7 @@ const percentualConclusao =
                 </button>
 
               </div>
+              
             </div>
           ))}
       </div>
