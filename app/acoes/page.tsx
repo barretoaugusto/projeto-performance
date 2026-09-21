@@ -307,7 +307,7 @@ const percentualConclusao =
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
 
-  <div className="text-gray-700 font-semibold">
+  <div className="bg-white p-4 rounded shadow">
     <h3 className="text-gray-500">
       Total de Ações
     </h3>
@@ -317,45 +317,53 @@ const percentualConclusao =
     </p>
   </div>
 
-  <div className="text-gray-700 font-semibold">
-    <h3>
-      Concluídas
-    </h3>
+  <div className="bg-green-100 p-4 rounded shadow">
 
-    <p className="text-3xl font-bold text-green-700">
-      {concluidas}
-    </p>
-  </div>
+  <h3 className="text-black font-semibold">
+    Concluídas
+  </h3>
 
-  <div className="text-gray-700 font-semibold">
-    <h3>
-      Em Andamento
-    </h3>
+  <p className="text-3xl font-bold text-green-700">
+    {concluidas}
+  </p>
 
-    <p className="text-3xl font-bold text-yellow-700">
-      {andamento}
-    </p>
-  </div>
+</div>
 
-  <div className="text-gray-700 font-semibold">
-    <h3>
-      Atrasadas
-    </h3>
+  <div className="bg-yellow-100 p-4 rounded shadow">
 
-    <p className="text-3xl font-bold text-red-700">
-      {atrasadas}
-    </p>
-  </div>
+  <h3 className="text-black font-semibold">
+    Em Andamento
+  </h3>
 
-  <div className="text-gray-700 font-semibold">
-    <h3>
-      % Conclusão
-    </h3>
+  <p className="text-3xl font-bold text-yellow-700">
+    {andamento}
+  </p>
 
-    <p className="text-3xl font-bold text-blue-700">
-      {percentualConclusao}%
-    </p>
-  </div>
+</div>
+
+  <div className="bg-red-100 p-4 rounded shadow">
+
+  <h3 className="text-black font-semibold">
+    Atrasadas
+  </h3>
+
+  <p className="text-3xl font-bold text-red-700">
+    {atrasadas}
+  </p>
+
+</div>
+
+  <div className="bg-blue-100 p-4 rounded shadow">
+
+  <h3 className="text-black font-semibold">
+    % Conclusão
+  </h3>
+
+  <p className="text-3xl font-bold text-blue-700">
+    {percentualConclusao}%
+  </p>
+
+</div>
 
 </div>
 
