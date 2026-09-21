@@ -11,8 +11,24 @@ export default function AcoesPage() {
   const [prazo, setPrazo] = useState("");
   const [status, setStatus] = useState("Aberta");
   const router = useRouter();
-  const [filtroStatus, setFiltroStatus] =
-    useState("Todos");
+  const [filtroStatus, setFiltroStatus] = useState("Todos");
+useEffect(() => {
+
+  async function verificarLogin() {
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push("/login");
+    }
+
+  }
+
+  verificarLogin();
+
+}, []);
 
   const [busca, setBusca] = useState("");
 
@@ -291,7 +307,7 @@ const percentualConclusao =
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
 
-  <div className="bg-white p-4 rounded shadow">
+  <div className="text-gray-700 font-semibold">
     <h3 className="text-gray-500">
       Total de Ações
     </h3>
@@ -301,7 +317,7 @@ const percentualConclusao =
     </p>
   </div>
 
-  <div className="bg-green-100 p-4 rounded shadow">
+  <div className="text-gray-700 font-semibold">
     <h3>
       Concluídas
     </h3>
@@ -311,7 +327,7 @@ const percentualConclusao =
     </p>
   </div>
 
-  <div className="bg-yellow-100 p-4 rounded shadow">
+  <div className="text-gray-700 font-semibold">
     <h3>
       Em Andamento
     </h3>
@@ -321,7 +337,7 @@ const percentualConclusao =
     </p>
   </div>
 
-  <div className="bg-red-100 p-4 rounded shadow">
+  <div className="text-gray-700 font-semibold">
     <h3>
       Atrasadas
     </h3>
@@ -331,7 +347,7 @@ const percentualConclusao =
     </p>
   </div>
 
-  <div className="bg-blue-100 p-4 rounded shadow">
+  <div className="text-gray-700 font-semibold">
     <h3>
       % Conclusão
     </h3>

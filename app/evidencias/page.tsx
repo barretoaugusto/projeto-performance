@@ -3,8 +3,47 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import jsPDF from "jspdf";
+import { useRouter } from "next/navigation";
 
 export default function Evidencias() {
+
+const router = useRouter();
+
+useEffect(() => {
+
+  async function verificarLogin() {
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push("/login");
+    }
+
+  }
+
+  verificarLogin();
+
+}, []);
+
+useEffect(() => {
+
+  async function verificarLogin() {
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push("/login");
+    }
+
+  }
+
+  verificarLogin();
+
+}, []);
 
   const [acaoId, setAcaoId] =
     useState("");
