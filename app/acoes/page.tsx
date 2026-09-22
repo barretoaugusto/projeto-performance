@@ -544,12 +544,6 @@ function calcularTempoPrevisto(acao: any) {
                📜 Histórico
               </button>
 
-              <p>
-             Início:
-             {" "}
-             {acao.inicio_previsto}
-            </p>
-
             <p>
              Prazo:
              {" "}

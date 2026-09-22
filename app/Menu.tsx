@@ -29,6 +29,13 @@ export default function Menu() {
         </button>
 
         <button
+          onClick={() => router.push("/usuarios")}
+          className="text-left hover:bg-slate-700 p-2 rounded"
+        >
+          👥 Usuários
+        </button>
+
+        <button
           onClick={() => router.push("/programas")}
           className="text-left hover:bg-slate-700 p-2 rounded"
         >
@@ -46,7 +53,7 @@ export default function Menu() {
           onClick={() => router.push("/lancamentos")}
           className="text-left hover:bg-slate-700 p-2 rounded"
         >
-          📝 Lançamentos
+          📝 Lançamentos de Ocorrências
         </button>
 
         <button
