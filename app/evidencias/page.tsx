@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import jsPDF from "jspdf";
 import { useRouter } from "next/navigation";
+import PermissionGuard from "../components/permissionGuard";
 
 export default function Evidencias() {
 
@@ -225,6 +226,14 @@ async function gerarPDF(evidencia: any) {
 }
 
   return (
+    <PermissionGuard
+  permissoes={[
+    "Administrador",
+    "Gestor",
+    "Cliente",
+    "Consultor"
+  ]}
+>
     <main className="p-10 bg-slate-100 min-h-screen">
       <h1 className="text-4xl font-bold text-black mb-8">
         📎 Evidências
@@ -394,5 +403,6 @@ async function gerarPDF(evidencia: any) {
 </div>
 ))}
 </main>
+</PermissionGuard>
   );
 }

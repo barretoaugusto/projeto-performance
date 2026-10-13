@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { useRouter } from "next/navigation";
+import PermissionGuard from "../components/permissionGuard";
 
 export default function UsuariosPage() {
 
@@ -10,6 +12,58 @@ const [nome, setNome] = useState("");
 const [email, setEmail] = useState("");
 const [perfil, setPerfil] = useState("Consultor");
 const [clientes, setClientes] = useState<any[]>([]);
+const [usuarioAtual, setUsuarioAtual] = useState<any>(null);
+const router = useRouter()
+
+async function verificarPermissao() {
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    router.push("/login");
+    return;
+  }
+
+  const { data } = await supabase
+    .from("usuarios")
+    .select("*")
+    .eq("email", user.email)
+    .single();
+
+  if (!data) {
+    router.push("/");
+    return;
+  }
+
+  setUsuarioAtual(data);
+
+  if (data.perfil !== "Administrador") {
+    router.push("/");
+  }
+
+useEffect(() => {
+  carregarUsuarios();
+  carregarClientes();
+  verificarPermissao();
+  
+  async function carregarClientes() {
+  const { data } = await supabase
+    .from("clientes")
+    .select("*")
+    .order("nome");
+
+  if (data) {
+    setClientes(data);
+  }
+}
+}, []);
+
+}
+
+console.log(usuarioAtual);
+
 const [clienteId, setClienteId] = useState("");
 
 async function carregarClientes() {
@@ -24,11 +78,41 @@ async function carregarClientes() {
  }
 }
 
+<select
+  value={clienteId}
+  onChange={(e) => setClienteId(e.target.value)}
+  className="border p-2 rounded w-full"
+>
+  <option value="">
+    Selecione um cliente
+  </option>
+
+  {clientes.map((cliente) => (
+    <option
+      key={cliente.id}
+      value={cliente.id}
+    >
+      {cliente.nome}
+    </option>
+  ))}
+</select>
+
 useEffect(() => {
   carregarUsuarios();
   carregarClientes();
+  async function carregarClientes() {
+  const { data } = await supabase
+    .from("clientes")
+    .select("*")
+    .order("nome");
+
+  if (data) {
+    setClientes(data);
+  }
+}
 }, []);
-``
+
+
 function nomeCliente(id: string) {
   const cliente = clientes.find(
     (c) => c.id === id
@@ -75,6 +159,9 @@ async function salvarUsuario() {
   carregarUsuarios();
 }
   return (
+  <PermissionGuard
+    permissoes={["Administrador"]}
+  >
     <main className="p-6">
 
       <div className="flex justify-between items-center mb-6">
@@ -92,6 +179,11 @@ async function salvarUsuario() {
         <div className="bg-white p-4 rounded shadow mt-4">
 
   <h2>Novo Usuário</h2>
+
+  <p>
+  Perfil: {usuarioAtual?.perfil}
+</p>
+
 
   <input
     type="text"
@@ -238,5 +330,6 @@ async function salvarUsuario() {
       </div>
 
     </main>
-  );
+  </PermissionGuard>
+);
 }

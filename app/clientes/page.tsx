@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
+import PermissionGuard from "../components/permissionGuard";
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<any[]>([]);
@@ -75,6 +76,9 @@ useEffect(() => {
   }
 
   return (
+<PermissionGuard
+  permissoes={["Administrador", "Gestor"]}
+>
     <main className="p-10 bg-slate-100 min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-black">
@@ -153,5 +157,7 @@ useEffect(() => {
         ))}
       </div>
     </main>
-  );
+    
+  </PermissionGuard>
+);
 }

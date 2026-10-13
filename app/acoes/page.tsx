@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
+import PermissionGuard from "../components/permissionGuard";
 
 export default function AcoesPage() {
   const [acoes, setAcoes] = useState<any[]>([]);
@@ -320,6 +321,14 @@ function calcularTempoPrevisto(acao: any) {
 }
 
   return (
+    <PermissionGuard
+  permissoes={[
+    "Administrador",
+    "Gestor",
+    "Cliente",
+    "Consultor"
+  ]}
+>
     <main className="p-10 bg-slate-100 min-h-screen">
       <h1 className="text-3xl font-bold text-black mb-8">
         Plano de Ação
@@ -628,5 +637,6 @@ function calcularTempoPrevisto(acao: any) {
           ))}
       </div>
     </main>
+    </PermissionGuard>
   );
 }
