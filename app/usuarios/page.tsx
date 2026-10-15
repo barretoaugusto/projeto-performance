@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 import PermissionGuard from "../components/permissionGuard";
+import RouteGuard from "../components/Routeguard";
 
 export default function UsuariosPage() {
 
@@ -165,6 +166,15 @@ async function salvarUsuario() {
 
   setUsuarioEditando(null);
 
+  setNome("");
+  setEmail("");
+  setSenha("");
+  setConfirmarSenha("");
+  setPerfil("");
+  setClienteId("");
+  setUsuarioEditando(null);
+  setMostrarFormulario(false);
+
   carregarUsuarios();
 
   return;
@@ -232,6 +242,7 @@ carregarUsuarios();
 }
 
   return (
+    <RouteGuard>
   <PermissionGuard
     permissoes={["Administrador"]}
   >
@@ -293,25 +304,6 @@ carregarUsuarios();
 />
 
 <select
-  value={clienteId}
-  onChange={(e) => setClienteId(e.target.value)}
-  className="border p-2 rounded w-full"
->
-  <option value="">
-    Selecione um cliente
-  </option>
-
-  {clientes.map((cliente) => (
-    <option
-      key={cliente.id}
-      value={cliente.id}
-    >
-      {cliente.nome_fantasia}
-    </option>
-  ))}
-</select>
-
-<select
   value={perfil}
   onChange={(e) => setPerfil(e.target.value)}
   className="border p-2 m-2 bg-white text-black rounded"
@@ -341,28 +333,6 @@ carregarUsuarios();
     </option>
   ))}
 </select>
-
-  <select
-    value={perfil}
-    onChange={(e) => setPerfil(e.target.value)}
-    className="border p-2 m-2 bg-white text-black rounded"
-  >
-    <option>
-      Administrador
-    </option>
-
-    <option>
-      Gestor
-    </option>
-
-    <option>
-      Consultor
-    </option>
-
-    <option>
-      Cliente
-    </option>
-  </select>
 
   <button
   onClick={salvarUsuario}
@@ -461,5 +431,6 @@ carregarUsuarios();
 
     </main>
   </PermissionGuard>
+  </RouteGuard>
 );
 }

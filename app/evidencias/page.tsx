@@ -8,6 +8,25 @@ import PermissionGuard from "../components/permissionGuard";
 
 export default function Evidencias() {
 
+  const [evidenciaEditando, setEvidenciaEditando] =
+  useState<any>(null);
+  
+  function editarEvidencia(evidencia: any) {
+
+  setEvidenciaEditando(evidencia);
+
+  setAcaoId(evidencia.acao_id);
+
+  setCategoria(evidencia.categoria);
+
+  setDescricao(evidencia.descricao);
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}
+
 const router = useRouter();
 
 useEffect(() => {
@@ -341,7 +360,20 @@ async function gerarPDF(evidencia: any) {
 {evidencias.map((evidencia) => (
   <div
     key={evidencia.id}
-    className="border rounded p-4 mb-4">
+    className="bg-white rounded-xl shadow-md p-4 mb-4 border border-slate-200"
+>
+<div className="flex justify-between items-center mb-3">
+
+  <h3 className="text-lg font-bold text-slate-800">
+    Evidência
+  </h3>
+
+  <span className="text-sm text-slate-500">
+    #{evidencia.id}
+  </span>
+
+</div>
+
     <p className="text-black">
       <strong>Categoria:</strong>{" "}
       {evidencia.categoria}
@@ -370,7 +402,7 @@ async function gerarPDF(evidencia: any) {
       Foto Antes
     </p>
 
-    <img width={150}height={150}
+    <img width={150}height={150}className="rounded-lg shadow border"
   src={evidencia.foto_antes}
   alt="Foto Antes"></img>
   </div>
@@ -382,7 +414,7 @@ async function gerarPDF(evidencia: any) {
       Foto Depois
     </p>
 
-    <img width={150}height={150}
+    <img width={150}height={150}className="rounded-lg shadow border"
   src={evidencia.foto_depois}
   alt="Foto Depois">
   </img>
@@ -392,6 +424,19 @@ async function gerarPDF(evidencia: any) {
 </div>
 
 <button
+  className="  bg-sky-600  text-white  px-3 py-2 rounded mr-2"
+>
+  👁 Visualizar
+</button>
+
+<button
+  onClick={() => editarEvidencia(evidencia)}
+  className=" bg-amber-500 text-white px-3 py-2 rounded mr-2"
+>
+  ✏ Editar
+</button>
+
+<button
   onClick={() =>
     gerarPDF(evidencia)
   }
@@ -399,6 +444,7 @@ async function gerarPDF(evidencia: any) {
 >
   📄 Gerar PDF
 </button>
+
 
 </div>
 ))}
