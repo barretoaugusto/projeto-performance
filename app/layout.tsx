@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Menu from "./Menu";
+import RouteGuard from "./components/Routeguard";
 
 export const metadata: Metadata = {
   title: "Projeto Performance",
@@ -19,7 +20,9 @@ export default function RootLayout({
           <Menu />
 
           <main className="flex-1">
-            {children}
+  <RouteGuard>
+    {children}
+  </RouteGuard>
           </main>
         </div>
       </body>
